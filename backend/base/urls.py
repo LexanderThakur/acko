@@ -30,4 +30,7 @@ urlpatterns = [
     # Built-in webhook receiver (FR-10)
     path("webhook-events/", webhook_views.webhook_events, name="webhook_events"),
     path("webhook-events/receive/", webhook_views.webhook_receive, name="webhook_receive"),
+
+    # Ops
+    path("health/", sns_views.health, name="health"),
 ]
