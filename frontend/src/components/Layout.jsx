@@ -23,6 +23,7 @@ import { useAuth } from '../auth/AuthContext'
 const NAV = [
   { to: '/', label: 'Dashboard' },
   { to: '/services', label: 'Services' },
+  { to: '/comparisons', label: 'Comparisons' },
   { to: '/consumers', label: 'Consumers' },
   { to: '/publishing', label: 'Publishing' },
   { to: '/notifications', label: 'Notifications' },
@@ -69,7 +70,7 @@ export default function Layout() {
           {!isSmall && <Stack direction="row" spacing={1}>{navItems}</Stack>}
           <Box sx={{ flexGrow: 1 }} />
           {user && (
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
               <Typography variant="body2">Hi, {user.username}</Typography>
               <Button
                 color="inherit"

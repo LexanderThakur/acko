@@ -4,7 +4,6 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
 import {
   Alert,
-  Box,
   Button,
   Card,
   CardContent,
@@ -63,7 +62,7 @@ export default function RegisterPage() {
             <Stack component="form" onSubmit={handleSubmit} spacing={2} noValidate>
               {serverError && <Alert severity="error">{serverError}</Alert>}
 
-              <FastField name="username">
+              <Field name="username">
                 {({ field, meta }) => (
                   <TextField
                     {...field}
@@ -73,15 +72,15 @@ export default function RegisterPage() {
                     helperText={meta.touched && meta.error ? meta.error : ' '}
                   />
                 )}
-              </FastField>
+              </Field>
 
-              <FastField name="email">
+              <Field name="email">
                 {({ field }) => (
                   <TextField {...field} label="Email (optional)" fullWidth type="email" />
                 )}
-              </FastField>
+              </Field>
 
-              <FastField name="password">
+              <Field name="password">
                 {({ field, meta }) => (
                   <TextField
                     {...field}
@@ -92,7 +91,7 @@ export default function RegisterPage() {
                     helperText={meta.touched && meta.error ? meta.error : ' '}
                   />
                 )}
-              </FastField>
+              </Field>
 
               <Button type="submit" variant="contained" disabled={isSubmitting}>
                 {isSubmitting ? 'Registering…' : 'Register'}
