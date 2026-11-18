@@ -22,12 +22,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-kb9pzt0!_8ctw-lu$2-fyv26h!2ozmb*q_=3%_&qrawns&8i4x"
+# Set DJANGO_SECRET_KEY in production (see docker-compose.yml).
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-kb9pzt0!_8ctw-lu$2-fyv26h!2ozmb*q_=3%_&qrawns&8i4x",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = []
+# Empty + DEBUG on (local dev) -> Django's localhost fallback applies.
+# In production set DJANGO_ALLOWED_HOSTS, e.g. "localhost,127.0.0.1,backend".
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]
 
 
 # Application definition
@@ -81,7 +91,9 @@ WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        # SQLITE_DIR lets Docker put db.sqlite3 on a named volume
+        # (dev default stays backend/db.sqlite3).
+        "NAME": Path(os.environ.get("SQLITE_DIR", BASE_DIR)) / "db.sqlite3",
     }
 }
 

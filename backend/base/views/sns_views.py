@@ -23,6 +23,17 @@ class ListPagination(PageNumberPagination):
     page_size = 50
 
 
+@extend_schema(
+    responses={200: {"type": "object", "properties": {"ok": {"type": "boolean"}}}},
+    summary="Liveness probe (no auth) — used by the container healthcheck / load balancers",
+    operation_id="health",
+)
+@api_view(["GET"])
+@permission_classes([])
+def health(request):
+    return Response({"ok": True})
+
+
 def _published_version(service: Service):
     published = service.spec_versions.filter(status=SpecStatus.PUBLISHED).first()
     return published.version if published else None
