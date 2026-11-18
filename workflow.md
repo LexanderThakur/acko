@@ -555,6 +555,28 @@ Notification delivery is also recorded per attempt in the DB (`delivered` + HTTP
 
 ---
 
+## Running the whole project with Docker
+
+Instead of two dev servers, one command spins up everything (SPA served by nginx, API by gunicorn, SQLite on a persistent volume):
+
+```bash
+docker compose up --build      # from the repo root
+```
+
+| URL | What |
+| --- | --- |
+| http://localhost:5173 | the React app |
+| http://localhost:5173/api/... | the API (proxied by nginx to the backend) |
+| http://localhost:8765/docs/ | Swagger UI (direct) |
+| http://localhost:8765/api/health/ | liveness probe (used by the container healthcheck) |
+
+Notes:
+- The container starts with an **empty database** (volume `sqlite_data`). `docker compose down -v` wipes it; plain `down` keeps it.
+- Notifications are self-delivered to the built-in receiver via the compose network (`WEBHOOK_RECEIVER_URL=http://backend:8000/api/webhook-events/receive/`) — the Notifications page shows them as usual.
+- First `up` runs `python manage.py migrate` automatically. Image layers are ordered so `pip install` / `npm ci` are cached until their manifests change.
+
+---
+
 ## Cheat sheet
 
 | Step | Endpoint | Body to paste |

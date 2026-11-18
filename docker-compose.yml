@@ -1,0 +1,53 @@
+# Contract Guard — full stack in two containers.
+#
+#   frontend  nginx:80  ->  http://localhost:5173   (React SPA, proxies /api)
+#   backend   gunicorn  ->  http://localhost:8765   (Django API + /docs/ Swagger)
+#
+# SQLite lives on the `sqlite_data` volume, so data survives restarts.
+#
+#   docker compose up --build
+#   docker compose down            (add -v to wipe the database too)
+
+name: contract-guard
+
+services:
+  backend:
+    build:
+      context: ./backend
+    image: contract-guard-backend
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
+      # Host headers arrive from nginx (localhost), the healthcheck
+      # (127.0.0.1) and self-webhooks (backend) — all three allowed.
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      # put the database on the volume instead of inside the image layer
+      SQLITE_DIR: /app/data
+      # FR-10: notifications go to the built-in receiver, reachable over
+      # the compose network via the service's own DNS name
+      WEBHOOK_RECEIVER_URL: http://backend:8000/api/webhook-events/receive/
+    ports:
+      - "8765:8000"
+    volumes:
+      - sqlite_data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8000/api/health/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    image: contract-guard-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:
